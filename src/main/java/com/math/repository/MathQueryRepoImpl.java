@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.math.entity.Category;
+import com.math.entity.Keywords;
 import com.math.entity.MathQuery;
 
 @Repository
@@ -17,6 +18,9 @@ public class MathQueryRepoImpl {
 	
 	@Autowired
 	private IMathQueryRepo mathqueryRepo;
+	
+	@Autowired
+	private IKeywordRepo keywordsRepo;
 	
 	public List<MathQuery> fetchQueries() {
 		try {
@@ -85,6 +89,19 @@ public class MathQueryRepoImpl {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 			return null;
+		}
+	}
+	
+	public MathQuery getMathQueryById(int queryId) {
+		return mathqueryRepo.findById(queryId).get();
+	}
+	
+	public String saveKeyword(Keywords word) {
+		try {
+			keywordsRepo.save(word);
+			return "Success";
+		} catch(Exception e) {
+			return "Failed";
 		}
 	}
 	 

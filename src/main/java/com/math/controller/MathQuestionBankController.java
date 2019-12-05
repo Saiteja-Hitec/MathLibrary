@@ -3,8 +3,12 @@
  */
 package com.math.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.assertj.core.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -17,14 +21,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.math.entity.Category;
+import com.math.entity.Keywords;
 import com.math.entity.MathQuery;
 import com.math.service.MathQueryService;
 
-/**
- * @author Ajay J
- *
- * 
- */
 @Controller
 public class MathQuestionBankController {
 	
@@ -98,16 +98,52 @@ public class MathQuestionBankController {
 		return mv;
 	}
 	
+	@ResponseBody
+	@RequestMapping("/postKeywordsToQuery")
+	public String saveKeywords(@RequestParam("queryId") int queryID, @RequestParam(name = "keyword", defaultValue = "NA") String keyword) {
+		 System.out.println(queryID);
+		try {
+			service.saveKeywordsToQuery(queryID, keyword);
+			return "Saved Successfully";
+			} catch(Exception e) {
+			e.printStackTrace();
+			return "Error";
+		}
+	}
+	
+	
+	@RequestMapping("/searchByKeyword")
+	public String searchByKeywords(@RequestParam(name = "searchTerm", defaultValue = "NA") String searchTerm, ModelMap mv) {
+		System.out.println("Keyterm is:"+searchTerm);
+		if(!searchTerm.equalsIgnoreCase("NA")) {
+			String[] terms = searchTerm.trim().split(",");
+			Set<MathQuery> queryList = service.getQueriesBySearch(terms);
+			System.out.println("Result size:" +queryList.size());
+			List<Category> ctgList= service.getAllCategories();
+			if(queryList.size() == 0) {
+				mv.put("notFound", "No Queries Found!");
+			}
+			mv.put("mathList", queryList);
+			mv.put("categoryList", ctgList);
+			mv.put("ActiveCategory", "ALL");
+			return "viewList";
+		}
+		return null;
+	}
+	
+	
 	@PostMapping("/postQuery")
-	public String postQuery(@RequestParam("queryDesc") String queryDesc, @RequestParam("categoryId") int ctgId, ModelMap model) {
+	public String postQuery(@RequestParam("queryDesc") String queryDesc, @RequestParam("categoryId") int ctgId, @RequestParam(required = false, defaultValue = "NA") String keyword, ModelMap model) {
+		
 		MathQuery query = new MathQuery();
 		System.out.println("Category Id:" +ctgId);
+		System.out.println("Keyword:" +keyword);
 		Category ctg = service.getCategoryById(ctgId);
 		query.setQueryDesc(queryDesc.trim());
 		query.setCategory(ctg);
-		String msg = service.saveMathQuery(query);
+		String msg = service.saveMathQuery(query, keyword);
 		System.out.println(msg);
-		return "hello";
+		 return "hello";
 		
 	}
 	

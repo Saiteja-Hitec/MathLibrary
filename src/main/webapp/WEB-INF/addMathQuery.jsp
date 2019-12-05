@@ -21,19 +21,23 @@
      function validate() {
     	 var queryval = document.getElementById("querydesc").value;
     	 var ctgSel = document.getElementById("ctgname").value;
+    	 var keywordRes = document.getElementById("keyWord").value;
     	 document.getElementById("valMsgQDes").innerHTML = "";
     	 document.getElementById("valMsgCtg").innerHTML = "";
+    	 document.getElementById("valKeyword").innerHTML = "";
     	 var ctgRes;
     	 if(!isNaN(ctgSel)) {
     		 ctgRes = ctgSel.toString();
     	 }
     	 console.log(queryval, ctgRes);
-    	 if(isValid(queryval) && ctgRes !== '-1') {
+    	 if(isValid(queryval) && ctgRes !== '-1' && validateKeywords(keywordRes)) {
     		 return true;
     	 } else if(!isValid(queryval)) {
     		 document.getElementById("valMsgQDes").innerHTML = "This field is required";
     	 } else if(ctgRes === '-1') {
     		 document.getElementById("valMsgCtg").innerHTML = "This field is required";
+    	 } else if(!validateKeywords(keywordRes)) {
+    		 document.getElementById("valKeyword").innerHTML = "Each Keyword should not exceed 25chars and max keywords allowed are 3 separated by comma";
     	 }
     	 return false;
      }
@@ -43,6 +47,25 @@
     		 return true;
     	 }
     	 return false;
+     }
+     
+     function validateKeywords(value) {
+    	 if(value && value.trim() !== '') {
+ 			var srList = value.trim().split(',');
+ 	        if(srList.length > 3){
+ 	        	return false;
+ 	        } else if(srList.length == 1 && srList[0].trim().length > 25) {
+ 	        	return false;
+ 	        } else if(srList.length > 1) {
+ 	        	for(let item of srList) {
+ 	        		if(item.trim().length > 25) {
+ 	        			return false;
+ 	        		}
+ 	        	}
+ 	        }
+ 	        return true;
+ 		}
+ 		return true;
      }
 </script>
 
@@ -63,6 +86,10 @@
 	              </c:forEach>
              </select>
                <span class="error" id="valMsgCtg"></span>
+             <br/><br/>
+             <label>Enter Keywords(Optional)</label>
+             <input type="text" name="keyword" id="keyWord"/>
+             <span class="error" id="valKeyword"></span>
              <br/><br/>
              <input type="submit" value="SAVE">
 		     
